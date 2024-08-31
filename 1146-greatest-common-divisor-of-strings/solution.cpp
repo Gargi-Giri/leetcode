@@ -1,0 +1,20 @@
+class Solution {
+public:
+    string gcdOfStrings(string str1, string str2) {
+        if(str1+str2!=str2+str1){
+            return "";
+        }
+        int n1=str1.size();
+        int n2=str2.size();
+        int z=gcd(n1,n2); 
+        return str1.substr(0,z);
+    }
+};
+int gcd(int a,int b){
+    while(b!=0){
+        int t=b;
+        b=a%b;
+        a=t;
+    }
+    return a;
+}
