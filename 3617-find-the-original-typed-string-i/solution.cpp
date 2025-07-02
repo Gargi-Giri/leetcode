@@ -6,7 +6,7 @@ public:
         int i=0;
         while(i<n){
             int j=i;
-            while(j<n&&word[j]==word[i]){
+            while(j<n && word[j]==word[i]){
                 j++;
             }
             int len=j-i;
