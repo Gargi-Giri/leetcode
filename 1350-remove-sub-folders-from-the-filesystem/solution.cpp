@@ -1,23 +1,19 @@
 class Solution {
-public:
-    vector<string> removeSubfolders(vector<string>& folder) {
-        // Step 1: Sort the folder list lexicographically
-        sort(folder.begin(), folder.end());
-        
-        // Step 2: Create a result vector to store the final list of folders
-        vector<string> res;
-        
-        // Step 3: Iterate through the sorted folder list
-        for (const string& f : folder) {
-            // Step 4: Check if the current folder is not a subfolder of the last added folder
-            if (res.empty() || f.find(res.back() + '/') != 0) {
-                // If it's not a subfolder, add it to the result
-                res.push_back(f);
-            }
-        }
-        
-        // Step 5: Return the result
-        return res;
-    }
-};
+    public:
+        vector<string> removeSubfolders(vector<string>& folder) {
+                unordered_set<string> dirSet(folder.begin(), folder.end());
+                        vector<string> res;
+                                for (const string& dir : folder) {
+                                            res.push_back(dir);
+                                                        for (int i = 0; i < dir.size(); ++i) {
+                                                                        if (dir[i] == '/' && dirSet.count(dir.substr(0, i))) {
+                                                                                            res.pop_back();
+                                                                                                                break;
+                                                                                                                                }
+                                                                                                                                            }
+                                                                                                                                                    }
+                                                                                                                                                            
+                                                                                                                                                                    return res;
+                                                                                                                                                                        }
+                                                                                                                                                                        };
 
