@@ -1,28 +1,22 @@
 class Solution {
-public:
-    int maxSum(vector<int>& nums) {
-        bool hasPositive = false;
-        int maxNegative = INT_MIN;
-        unordered_set<int> uniqueNumbers;
-        int maxSum = 0;
-
-        for (int num : nums) {
-            if (num > 0) {
-                hasPositive = true;
-                uniqueNumbers.insert(num); // Only store unique positives
-            }
-            maxNegative = max(maxNegative, num);
-        }
-
-        // If no positive numbers exist, return the max negative number
-        if (!hasPositive) return maxNegative;
-
-        // Sum up all unique positive numbers
-        for (int num : uniqueNumbers) {
-            maxSum += num;
-        }
-
-        return maxSum;
-    }
-};
+    public:
+        int maxSum(vector<int>& nums) {
+                int sum = 0;
+                        set<int> st;
+                                int mxNeg = INT_MIN;
+                                        for (int i = 0; i < nums.size(); i++) {
+                                                    if (nums[i] > 0)
+                                                                    st.insert(nums[i]);
+                                                                                else
+                                                                                                mxNeg = max(mxNeg, nums[i]);
+                                                                                                        }
+                                                                                                                for (auto val : st) {
+                                                                                                                            sum += val;
+                                                                                                                                    }
+                                                                                                                                            if (st.size())
+                                                                                                                                                        return sum;
+                                                                                                                                                                else
+                                                                                                                                                                            return mxNeg;
+                                                                                                                                                                                }
+                                                                                                                                                                                };
 
