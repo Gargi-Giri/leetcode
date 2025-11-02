@@ -1,46 +1,42 @@
 class Solution {
 public:
     int countUnguarded(int m, int n, vector<vector<int>>& guards, vector<vector<int>>& walls) {
-        vector<vector<int>> grid(m, vector<int>(n, 0));
-        // 0 = free, 1 = guard, 2 = wall, 3 = guardable
+        // Initialize grid with zeros
+        int g[m][n];
+        memset(g, 0, sizeof(g));
         
-        for (const auto& guard : guards) {
-            grid[guard[0]][guard[1]] = 1;
+        // Mark guards and walls as 2
+        for (auto& e : guards) {
+            g[e[0]][e[1]] = 2;
         }
-        for (const auto& wall : walls) {
-            grid[wall[0]][wall[1]] = 2;
-        }
-        
-        auto mark_guarded = [&](int r, int c) {
-            for (int row = r + 1; row < m; row++) {
-                if (grid[row][c] == 1 || grid[row][c] == 2) break;
-                grid[row][c] = 3;
-            }
-            for (int row = r - 1; row >= 0; row--) {
-                if (grid[row][c] == 1 || grid[row][c] == 2) break;
-                grid[row][c] = 3;
-            }
-            for (int col = c + 1; col < n; col++) {
-                if (grid[r][col] == 1 || grid[r][col] == 2) break;
-                grid[r][col] = 3;
-            }
-            for (int col = c - 1; col >= 0; col--) {
-                if (grid[r][col] == 1 || grid[r][col] == 2) break;
-                grid[r][col] = 3;
-            }
-        };
-        
-        for (const auto& guard : guards) {
-            mark_guarded(guard[0], guard[1]);
+        for (auto& e : walls) {
+            g[e[0]][e[1]] = 2;
         }
         
-        int res = 0;
-        for (const auto& row : grid) {
-            for (int cell : row) {
-                if (cell == 0) res++;
+        // Directions: up, right, down, left
+        int dirs[5] = {-1, 0, 1, 0, -1};
+        
+        // Process each guard's line of sight
+        for (auto& e : guards) {
+            for (int k = 0; k < 4; ++k) {
+                int x = e[0], y = e[1];
+                int dx = dirs[k], dy = dirs[k + 1];
+                
+                // Check cells in current direction until hitting boundary or obstacle
+                while (x + dx >= 0 && x + dx < m && y + dy >= 0 && y + dy < n && g[x + dx][y + dy] < 2) {
+                    x += dx;
+                    y += dy;
+                    g[x][y] = 1;
+                }
             }
         }
         
-        return res;
+        // Count unguarded cells (cells with value 0)
+        int unguardedCount = 0;
+        for (int i = 0; i < m; i++) {
+            unguardedCount += count(g[i], g[i] + n, 0);
+        }
+        
+        return unguardedCount;
     }
 };
