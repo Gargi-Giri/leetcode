@@ -1,52 +1,81 @@
 class Solution {
 public:
-    long long minimumCost(string source, string target,
-                          vector<char>& original,
-                          vector<char>& changed,
-                          vector<int>& cost) {
+    long long minimumCost(string source, string target, vector<char>& original,
+                          vector<char>& changed, vector<int>& cost) {
+        // Create a graph representation of character conversions
+        vector<vector<pair<int, int>>> adjacencyList(26);
 
-        const long long INF = 1e18;
-        int n = 26;
-
-        // Step 1: distance matrix
-        vector<vector<long long>> dist(n, vector<long long>(n, INF));
-
-        // Cost to convert same character is 0
-        for (int i = 0; i < n; i++) {
-            dist[i][i] = 0;
+        // Populate the adjacency list with character conversions
+        int conversionCount = original.size();
+        for (int i = 0; i < conversionCount; i++) {
+            adjacencyList[original[i] - 'a'].push_back(
+                {changed[i] - 'a', cost[i]});
         }
 
-        // Step 2: populate direct transformation costs
-        for (int i = 0; i < original.size(); i++) {
-            int u = original[i] - 'a';
-            int v = changed[i] - 'a';
-            dist[u][v] = min(dist[u][v], (long long)cost[i]);
+        // Calculate shortest paths for all possible character conversions
+        vector<vector<long long>> minConversionCosts(26, vector<long long>(26));
+        for (int i = 0; i < 26; i++) {
+            minConversionCosts[i] = dijkstra(i, adjacencyList);
         }
 
-        // Step 3: Floyd–Warshall
-        for (int k = 0; k < n; k++) {
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if (dist[i][k] + dist[k][j] < dist[i][j]) {
-                        dist[i][j] = dist[i][k] + dist[k][j];
-                    }
+        // Calculate the total cost of converting source to target
+        long long totalCost = 0;
+        int stringLength = source.length();
+        for (int i = 0; i < stringLength; i++) {
+            if (source[i] != target[i]) {
+                long long charConversionCost =
+                    minConversionCosts[source[i] - 'a'][target[i] - 'a'];
+                if (charConversionCost == -1) {
+                    return -1;  // Conversion not possible
+                }
+                totalCost += charConversionCost;
+            }
+        }
+        return totalCost;
+    }
+
+private:
+    // Find minimum conversion costs from a starting character to all other
+    // characters
+    vector<long long> dijkstra(
+        int startChar, const vector<vector<pair<int, int>>>& adjacencyList) {
+        // Priority queue to store characters with their conversion cost, sorted
+        // by cost
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>,
+                       greater<pair<long long, int>>>
+            priorityQueue;
+
+        // Initialize the starting character with cost 0
+        priorityQueue.push({0, startChar});
+
+        // Array to store the minimum conversion cost to each character
+        vector<long long> minCosts(26, -1);
+
+        while (!priorityQueue.empty()) {
+            auto [currentCost, currentChar] = priorityQueue.top();
+            priorityQueue.pop();
+
+            if (minCosts[currentChar] != -1 &&
+                minCosts[currentChar] < currentCost)
+                continue;
+
+            // Explore all possible conversions from the current character
+            for (auto& [targetChar, conversionCost] :
+                 adjacencyList[currentChar]) {
+                long long newTotalCost = currentCost + conversionCost;
+
+                // If we found a cheaper conversion, update its cost
+                if (minCosts[targetChar] == -1 ||
+                    newTotalCost < minCosts[targetChar]) {
+                    minCosts[targetChar] = newTotalCost;
+                    // Add the updated conversion to the queue for further
+                    // exploration
+                    priorityQueue.push({newTotalCost, targetChar});
                 }
             }
         }
-
-        // Step 4: calculate total cost
-        long long totalCost = 0;
-        for (int i = 0; i < source.size(); i++) {
-            int s = source[i] - 'a';
-            int t = target[i] - 'a';
-
-            if (dist[s][t] == INF) {
-                return -1;
-            }
-            totalCost += dist[s][t];
-        }
-
-        return totalCost;
+        // Return the array of minimum conversion costs from the starting
+        // character to all others
+        return minCosts;
     }
 };
-
