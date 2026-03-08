@@ -1,14 +1,31 @@
 class Solution {
 public:
-    string findDifferentBinaryString(vector<string>& nums) {
-        string result;
-        for (int i = 0; i < nums.size(); i++) {
-            if (nums[i][i] == '0') {
-                result += '1';
-            } else {
-                result += '0';
+    int n;
+    unordered_set<string> numsSet;
+    
+    string generate(string curr) {
+        if (curr.size() == n) {
+            if (numsSet.find(curr) == numsSet.end()) {
+                return curr;
             }
+            
+            return "";
         }
-        return result;
+        
+        string addZero = generate(curr + "0");
+        if (addZero.size() > 0) {
+            return addZero;
+        }
+        
+        return generate(curr + "1");
+    }
+    
+    string findDifferentBinaryString(vector<string>& nums) {
+        n = nums.size();
+        for (string s : nums) {
+            numsSet.insert(s);
+        }
+        
+        return generate("");
     }
 };
