@@ -1,22 +1,35 @@
 class Solution {
-    int n2;
-    string dfs(string prefix, int n, int k) {
-        if (n == 0)
-            return prefix;
-        for (char c = 'a'; c <= 'c'; c++) {
-            if (!prefix.empty() && c == prefix.back())
-                continue;
-            int cnt = (1 << (n2 - prefix.length() - 1));
-            if (cnt >= k)
-                return dfs(prefix + c, n - 1, k);
-            else
-                k -= cnt;
-        }
-        return "";
-    }
 public:
     string getHappyString(int n, int k) {
-        n2 = n;
-        return dfs("", n, k);
+        string currentString = "";
+        vector<string> happyStrings;
+        // Generate all happy strings of length n
+        generateHappyStrings(n, currentString, happyStrings);
+
+        // Check if there are at least k happy strings
+        if (happyStrings.size() < k) return "";
+
+        return happyStrings[k - 1];
+    }
+
+private:
+    void generateHappyStrings(int n, string currentString,
+                              vector<string> &happyStrings) {
+        // If the current string has reached the desired length, add it to the
+        // list
+        if (currentString.size() == n) {
+            happyStrings.push_back(currentString);
+            return;
+        }
+
+        // Try adding each character ('a', 'b', 'c') to the current string
+        for (char currentChar = 'a'; currentChar <= 'c'; currentChar++) {
+            // Skip if the current character is the same as the last character
+            if (currentString.size() > 0 && currentString.back() == currentChar)
+                continue;
+
+            // Recursively generate the next character
+            generateHappyStrings(n, currentString + currentChar, happyStrings);
+        }
     }
 };
