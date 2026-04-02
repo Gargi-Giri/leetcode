@@ -1,54 +1,33 @@
-#include <vector>
-#include <algorithm>
-
-using namespace std;
-
 class Solution {
 public:
     int maximumAmount(vector<vector<int>>& coins) {
-        int m = coins.size();
-        int n = coins[0].size();
-        vector<vector<vector<int>>> dp(m, vector<vector<int>>(n, vector<int>(3, -1e9)));
+        int m = coins.size(), n = coins[0].size();
+        vector memo(m, vector(n, array<int, 3>{INT_MIN, INT_MIN, INT_MIN}));
 
-        if (coins[0][0] < 0) {
-            dp[0][0][1] = 0;
-            dp[0][0][0] = coins[0][0];
-        } else {
-            dp[0][0][0] = coins[0][0];
-        }
-
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                for (int k = 0; k < 3; ++k) {
-                    if (i == 0 && j == 0) continue;
-
-                    if (i > 0) {
-                        int new_coins = dp[i - 1][j][k];
-                        if (coins[i][j] < 0) {
-                            if (k < 2) {
-                                dp[i][j][k + 1] = max(dp[i][j][k + 1], new_coins);
-                            }
-                            dp[i][j][k] = max(dp[i][j][k], new_coins + coins[i][j]); // Corrected this line
-                        } else {
-                            dp[i][j][k] = max(dp[i][j][k], new_coins + coins[i][j]);
-                        }
-                    }
-
-                    if (j > 0) {
-                        int new_coins = dp[i][j - 1][k];
-                        if (coins[i][j] < 0) {
-                            if (k < 2) {
-                                dp[i][j][k + 1] = max(dp[i][j][k + 1], new_coins);
-                            }
-                            dp[i][j][k] = max(dp[i][j][k], new_coins + coins[i][j]); // Corrected this line
-                        } else {
-                            dp[i][j][k] = max(dp[i][j][k], new_coins + coins[i][j]);
-                        }
-                    }
-                }
+        function<int(int, int, int)> dfs = [&](int i, int j, int k) -> int {
+            if (i >= m || j >= n) {
+                return INT_MIN;
             }
-        }
 
-        return max({dp[m - 1][n - 1][0], dp[m - 1][n - 1][1], dp[m - 1][n - 1][2]});
+            int x = coins[i][j];
+            // arrive at the destination
+            if (i == m - 1 && j == n - 1) {
+                return k > 0 ? max(0, x) : x;
+            }
+
+            int res = memo[i][j][k];
+            if (res != INT_MIN) {
+                return res;
+            }
+            // not neutralize
+            res = max(dfs(i + 1, j, k), dfs(i, j + 1, k)) + x;
+            if (k > 0 && x < 0) {
+                // neutralize
+                res = max({res, dfs(i + 1, j, k - 1), dfs(i, j + 1, k - 1)});
+            }
+            return memo[i][j][k] = res;
+        };
+
+        return dfs(0, 0, 2);
     }
 };
