@@ -1,40 +1,52 @@
 class Solution {
 public:
-    void swapChar(vector<char> &vec)
-    {
-        int n = vec.size(), Hash = 0;
-        unordered_map<int, int>store;
-        for(int i = 0; i < n; i++)
-        {
-            Hash += vec[i] == '#';
-            if(vec[i] == '*')
-                store[i] = Hash, Hash = 0;
-        }
-        if(Hash) store[n] = Hash;
+    vector<vector<char>> rotateTheBox(vector<vector<char>>& box) {
+        int m = box.size();
+        int n = box[0].size();
+        vector<vector<char>> result(n, vector<char>(m));
 
-        for(auto [idx_i, count] : store)
-        {
-            int idx = idx_i;
-            while(count--) vec[--idx] = '#';
-            while(idx-- and vec[idx] != '*') vec[idx] = '.';
-        }
-    }
-
-    vector<vector<char>> rotateTheBox(vector<vector<char>>& box) 
-    {
-        int n = box.size(), m = box[0].size();
-        for(auto &Box:box) swapChar(Box);
-
-        vector<vector<char>>box90;
-        for(int i = m - 1; i >= 0; i--)
-        {
-            vector<char>temp;
-            for(int j = n - 1; j >= 0; j--)
-                temp.push_back(box[j][i]);
-            box90.push_back(temp);
+        // Create the transpose of the input grid in `result`
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                result[i][j] = box[j][i];
+            }
         }
 
-        reverse(begin(box90), end(box90));
-        return box90;
+        // Reverse each row in the transpose grid to complete the 90° rotation
+        for (int i = 0; i < n; i++) {
+            reverse(result[i].begin(), result[i].end());
+        }
+
+        // Apply gravity to let stones fall to the lowest possible empty cell in
+        // each column
+        for (int j = 0; j < m; j++) {
+            // Process each cell in column `j` from bottom to top
+            for (int i = n - 1; i >= 0; i--) {
+                if (result[i][j] == '.') {  // Found an empty cell; check if a
+                                            // stone can fall into it
+                    int nextRowWithStone = -1;
+
+                    // Look for a stone directly above the empty cell
+                    // `result[i][j]`
+                    for (int k = i - 1; k >= 0; k--) {
+                        if (result[k][j] == '*')
+                            break;  // Obstacle blocks any stones above
+                        if (result[k][j] ==
+                            '#') {  // Stone found with no obstacles in between
+                            nextRowWithStone = k;
+                            break;
+                        }
+                    }
+
+                    // If a stone was found above, let it fall into the empty
+                    // cell `result[i][j]`
+                    if (nextRowWithStone != -1) {
+                        result[nextRowWithStone][j] = '.';
+                        result[i][j] = '#';
+                    }
+                }
+            }
+        }
+        return result;
     }
 };
